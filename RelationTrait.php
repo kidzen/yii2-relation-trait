@@ -49,6 +49,7 @@ use yii\helpers\ArrayHelper;
 trait RelationTrait
 {
 
+    public $test = false;
     /**
      * Load all attribute including related attribute
      * @param $POST
@@ -173,6 +174,14 @@ trait RelationTrait
 
                         $AQ = $this->getRelation($name);
                         $link = $AQ->link;
+                        $conditions = [];
+                        if (!empty($AQ->on)) {
+                            $conditions[] = $AQ->on;
+                        }
+
+                        if (!empty($AQ->where)) {
+                            $conditions[] = $AQ->where;
+                        }
                         if (!empty($records)) {
                             $notDeletedPK = [];
                             $notDeletedFK = [];
@@ -184,6 +193,13 @@ trait RelationTrait
                                     foreach ($link as $key => $value) {
                                         $relModel->$key = $this->$value;
                                         $notDeletedFK[$key] = $this->$value;
+                                    }
+
+                                    if (!empty($conditions)) {
+                                        foreach ($conditions as $condition) {
+                                            // var_dump($condition);
+                                            array_push($query, $condition);
+                                        }
                                     }
 
                                     //GET PK OF REL MODEL
@@ -205,6 +221,11 @@ trait RelationTrait
                                     if ($isManyMany) {
                                         // Many Many
                                         $query = ['and', $notDeletedFK];
+                                        if (!empty($conditions)) {
+                                            foreach ($conditions as $condition) {
+                                                array_push($query, $condition);
+                                            }
+                                        }
                                         foreach ($notDeletedPK as $attr => $value) {
                                             $notIn = ['not in', $attr, $value];
                                             array_push($query, $notIn);
@@ -222,6 +243,17 @@ trait RelationTrait
                                     } else {
                                         // Has Many
                                         $query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $notDeletedPK]];
+                                        // added by kidzen
+                                        // if($this->test){
+                                        //     if($relModel->classname() === 'common\models\Branch'){
+                                        //         $notEffective = ['not in', 'id', $ignoreList['common\models\Branch']];
+                                        //         $query = ['and', ['company_id'=>12], ['not in', 'id', $notDeletedPK]];
+                                        //         var_dump($relModel);
+                                        //         array_push($query, $ignoreList);
+                                        //         // var_dump($query);
+                                        //     }
+                                        // }
+
                                         if (!empty($notDeletedPK)) {
                                             try {
                                                 if ($isSoftDelete) {
@@ -273,9 +305,13 @@ trait RelationTrait
 
                 //No Children left
                 $relAvail = array_keys($this->relatedRecords);
+                var_dump($relAvail);
                 $relData = $this->getRelationData();
                 $allRel = array_keys($relData);
                 $noChildren = array_diff($allRel, $relAvail);
+                if($this->test) {
+                    die('die for test');
+                }
 
                 foreach ($noChildren as $relName) {
                     /* @var $relModel ActiveRecord */
