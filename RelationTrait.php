@@ -243,6 +243,11 @@ trait RelationTrait
                                     } else {
                                         // Has Many
                                         $query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $notDeletedPK]];
+                                        if (!empty($conditions)) {
+                                            foreach ($conditions as $condition) {
+                                                array_push($query, $condition);
+                                            }
+                                        }
                                         // added by kidzen
                                         // if($this->test){
                                         //     if($relModel->classname() === 'common\models\Branch'){
@@ -305,13 +310,9 @@ trait RelationTrait
 
                 //No Children left
                 $relAvail = array_keys($this->relatedRecords);
-                var_dump($relAvail);
                 $relData = $this->getRelationData();
                 $allRel = array_keys($relData);
                 $noChildren = array_diff($allRel, $relAvail);
-                if($this->test) {
-                    die('die for test');
-                }
 
                 foreach ($noChildren as $relName) {
                     /* @var $relModel ActiveRecord */
@@ -353,6 +354,10 @@ trait RelationTrait
                     }
                 }
 
+                if($this->test) {
+                    $trans->rollback();
+                    die('die for test');
+                }
 
                 if ($error) {
                     $trans->rollback();
