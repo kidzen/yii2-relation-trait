@@ -195,12 +195,12 @@ trait RelationTrait
                                         $notDeletedFK[$key] = $this->$value;
                                     }
 
-                                    if (!empty($conditions)) {
-                                        foreach ($conditions as $condition) {
-                                            // var_dump($condition);
-                                            array_push($query, $condition);
-                                        }
-                                    }
+                                    // if (!empty($conditions)) {
+                                    //     foreach ($conditions as $condition) {
+                                    //         // var_dump($condition);
+                                    //         array_push($query, $condition);
+                                    //     }
+                                    // }
 
                                     //GET PK OF REL MODEL
                                     if ($isManyMany) {
